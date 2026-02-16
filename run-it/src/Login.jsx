@@ -16,8 +16,23 @@ export default function Login() {
     setError(null);
     try {
       const res = await axios.post("http://localhost:5000/api/auth/login", form);
+      
+      // ✅ Guardar dados do usuário no localStorage
+      localStorage.setItem("usuarioLogado", JSON.stringify({
+        nome: res.data.user.nome,
+        email: res.data.user.email,
+      }));
+      
+      // ✅ Detectar se é admin por email específico
+      // Você pode mudar isso para verificar um campo no banco de dados
+      const emailsAdmin = ["admin@runit.com", "admin@gmail.com"];
+      const isAdmin = emailsAdmin.includes(res.data.user.email);
+      
       localStorage.setItem("token", res.data.token);
-      navigate("/dashboard");
+      localStorage.setItem("isAdmin", isAdmin);
+      
+      // Redireciona para admin ou dashboard baseado no role
+      navigate(isAdmin ? "/admin" : "/dashboard");
     } catch (err) {
       setError(err.response?.data?.msg || "Erro ao fazer login");
     }
@@ -31,8 +46,21 @@ export default function Login() {
       >
         <h2 className="text-2xl font-bold text-center">Login</h2>
         {error && <p className="text-red-500 text-sm">{error}</p>}
-        <input className="w-full p-2 border rounded" name="email" placeholder="Email" onChange={handleChange} />
-        <input className="w-full p-2 border rounded" type="password" name="senha" placeholder="Senha" onChange={handleChange} />
+        <input
+          className="w-full p-2 border rounded"
+          name="email"
+          placeholder="Email ou CPF"
+          onChange={handleChange}
+          value={form.email}
+        />
+        <input
+          className="w-full p-2 border rounded"
+          type="password"
+          name="senha"
+          placeholder="Senha"
+          onChange={handleChange}
+          value={form.senha}
+        />
         <button className="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700 transition">
           Entrar
         </button>

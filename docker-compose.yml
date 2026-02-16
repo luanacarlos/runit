@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # MongoDB
+  mongodb:
+    image: mongo:latest
+    container_name: runit_mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: runit
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - runit_network
+
+  # Backend
+  backend:
+    build: ./backend
+    container_name: runit_backend
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/runit
+    depends_on:
+      - mongodb
+    networks:
+      - runit_network
+    command: node server.js
+
+  # Frontend
+  frontend:
+    build: ./run-it
+    container_name: runit_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - runit_network
+
+volumes:
+  mongo_data:
+
+networks:
+  runit_network:
+    driver: bridge
