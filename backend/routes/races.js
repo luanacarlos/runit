@@ -75,7 +75,15 @@ router.delete("/:id", async (req, res) => {
 // ✅ Criar inscrição
 router.post("/:id/inscriptions", async (req, res) => {
   try {
-    const { nome, email, telefone, cpf, nascimento } = req.body;
+    const {
+      nome,
+      email,
+      telefone,
+      cpf,
+      nascimento,
+      kitOption = "pickup",
+      address = ""
+    } = req.body;
 
     const novaInscricao = new Inscription({
       raceId: req.params.id,
@@ -83,7 +91,9 @@ router.post("/:id/inscriptions", async (req, res) => {
       email,
       telefone,
       cpf,
-      nascimento: new Date(nascimento)
+      nascimento: new Date(nascimento),
+      kitOption,
+      address
     });
 
     await novaInscricao.save();

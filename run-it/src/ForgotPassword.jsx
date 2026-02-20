@@ -1,51 +1,38 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { useNavigate, Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import Logo from "./components/Logo";
 import { Button, Input } from "./components/FormComponents";
 import { theme } from "./theme";
 
-export default function Login() {
+export default function ForgotPassword() {
   const navigate = useNavigate();
-  const [form, setForm] = useState({ email: "", senha: "" });
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      const isAdmin = localStorage.getItem("isAdmin") === "true";
-      navigate(isAdmin ? "/admin" : "/dashboard", { replace: true });
+      navigate("/dashboard", { replace: true });
     }
   }, [navigate]);
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
+  const [email, setEmail] = useState("");
+  const [message, setMessage] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setMessage(null);
     setLoading(true);
+
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", form);
-
-      localStorage.setItem("usuarioLogado", JSON.stringify({
-        nome: res.data.user.nome,
-        email: res.data.user.email,
-      }));
-
-      const emailsAdmin = ["admin@runit.com", "admin@gmail.com"];
-      const isAdmin = emailsAdmin.includes(res.data.user.email);
-
-      localStorage.setItem("token", res.data.token);
-      localStorage.setItem("isAdmin", isAdmin);
-
-      navigate(isAdmin ? "/admin" : "/dashboard");
+      const res = await axios.post("http://localhost:5000/api/auth/forgot-password", { email });
+      setMessage(res.data.msg);
     } catch (err) {
-      setError(err.response?.data?.msg || "Erro ao fazer login");
+      setError(err.response?.data?.msg || "Erro ao solicitar recuperação");
     } finally {
       setLoading(false);
     }
@@ -84,8 +71,25 @@ export default function Login() {
               className="text-2xl font-bold text-center"
               style={{ color: theme.colors.secondary }}
             >
-              Entrar
+              Recuperar Senha
             </h2>
+
+            <p className="text-center text-sm" style={{ color: theme.colors.text }}>
+              Digite seu email e receberá um link para resetar sua senha.
+            </p>
+
+            {message && (
+              <div
+                style={{
+                  backgroundColor: "#E8F5E9",
+                  borderLeft: `4px solid ${theme.colors.success}`,
+                  color: theme.colors.success,
+                }}
+                className="p-3 rounded text-sm"
+              >
+                {message}
+              </div>
+            )}
 
             {error && (
               <div
@@ -103,21 +107,11 @@ export default function Login() {
             <Input
               name="email"
               type="email"
-              placeholder="Seu email"
-              onChange={handleChange}
-              value={form.email}
+              placeholder="seu@email.com"
+              onChange={(e) => setEmail(e.target.value)}
+              value={email}
               required
-              label="Email"
-            />
-
-            <Input
-              name="senha"
-              type="password"
-              placeholder="Sua senha"
-              onChange={handleChange}
-              value={form.senha}
-              required
-              label="Senha"
+              label="Email cadastrado"
             />
 
             <Button
@@ -126,28 +120,19 @@ export default function Login() {
               size="lg"
               disabled={loading}
             >
-              {loading ? "Entrando..." : "Entrar"}
+              {loading ? "Enviando..." : "Enviar link de recuperação"}
             </Button>
 
-            <div className="flex flex-col gap-2 pt-2">
+            <p className="text-center text-sm" style={{ color: theme.colors.text }}>
+              Lembrou a senha?{" "}
               <Link
-                to="/forgot-password"
+                to="/login"
                 style={{ color: theme.colors.primary }}
-                className="text-sm font-semibold hover:opacity-80 transition text-center"
+                className="font-semibold hover:opacity-80 transition"
               >
-                Esqueci minha senha
+                Fazer login
               </Link>
-              <Link
-                to="/register"
-                style={{
-                  backgroundColor: theme.colors.secondary,
-                  color: "white",
-                }}
-                className="py-2.5 rounded-lg text-sm font-semibold hover:opacity-90 transition text-center block"
-              >
-                Criar conta
-              </Link>
-            </div>
+            </p>
           </form>
         </div>
       </div>

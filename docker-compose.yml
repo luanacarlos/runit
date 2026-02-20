@@ -1,36 +1,39 @@
 version: '3.8'
 
 services:
-  # MongoDB
   mongodb:
     image: mongo:latest
-    container_name: runit_mongo
+    container_name: unit_mongo
     ports:
       - "27017:27017"
-    environment:
-      MONGO_INITDB_DATABASE: runit
     volumes:
       - mongo_data:/data/db
     networks:
       - runit_network
 
-  # Backend
   backend:
-    build: ./backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: runit_backend
     ports:
       - "5000:5000"
-    environment:
-      - MONGO_URI=mongodb://mongodb:27017/runit
     depends_on:
       - mongodb
+    environment:
+      MONGO_URI: mongodb://mongodb:27017/runit
+      MERCADOPAGO_ACCESS_TOKEN: ${MERCADOPAGO_ACCESS_TOKEN}
+      FRONTEND_URL: http://localhost
+      NODE_ENV: development
     networks:
       - runit_network
-    command: node server.js
+    volumes:
+      - ./backend:/app
 
-  # Frontend
   frontend:
-    build: ./run-it
+    build:
+      context: ./run-it
+      dockerfile: Dockerfile
     container_name: runit_frontend
     ports:
       - "80:80"

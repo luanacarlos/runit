@@ -6,7 +6,12 @@ const userSchema = new mongoose.Schema({
   telefone: { type: String, required: true },
   cpf: { type: String, required: true, unique: true },
   nascimento: { type: Date, required: true },
-  senha: { type: String, required: true }
+  sexo: { type: String, enum: ["Masculino", "Feminino"], required: true },
+  senha: { type: String, required: true },
+
+  // campos para recuperação de senha
+  resetToken: { type: String },
+  resetTokenExpires: { type: Date }
 });
 
 export default mongoose.model("User", userSchema);

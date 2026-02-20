@@ -8,6 +8,15 @@ const inscriptionSchema = new mongoose.Schema({
   telefone: { type: String, required: true },
   cpf: { type: String, required: true },
   nascimento: { type: Date, required: true },
+
+  // nova parte
+  kitOption: {
+    type: String,
+    enum: ["pickup", "delivery"],
+    default: "pickup"
+  },
+  address: { type: String },               // somente se delivery
+
   inscrito_em: { type: Date, default: Date.now }
 });
 
